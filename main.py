@@ -1,43 +1,12 @@
-"""
-     @ @       @ @ @                   @       S                   + *               . ;
- @ @ @ @ @   @ @ @ @   % @ @ @     @ @ @ @   @ @ @ @ # @ @ @ @ @ @ @ @ @ %       @ @ @ @ @ @ @       @ @ @ @ @ @ @ @ @
- @ @ @ @ @   @ @   @ * @     @     @ @   @ * @   @ @ @ @               @ @     @ @           @ @ # @ @               @ @
- @ @     @ @ @     @ @ #     ? @   @     @ @ @     % @ @             @ @ @   @ @               @ @ S                   @
- @       @ @       @ @ @     , @   @     ; @       @   @                 @   @                   @ @                   @
- @       @ @       @ + @     , @   @       @     ? @ S @ @ @       @ @ @ @   @         @         @ @         @ @       @
- @         @     , @   @     , @   @             @       + @       @         @       @ @ @       @ @ @       @         @
- @         @     @ *   @       @   @           @ @         @       @         @       @   @       @   @               @
- @ *       .     @     @       @   @           @           @       @         @       @ % @       @   @             @ ?
- , @             @     @       @   @           @ @         @       @         @       @ @ @     # @   @             @ ?
-   @             @     @       @   @             @ @       @       @         @       @ @ @ @ @ @ @   @       @       @
-   @             @     @       @   @               @ @     @       @         @ @       @ @ @ @ @ @   @       @       @
-   @ @         @ @     @       @   @       @         @ ?   @       @         : @               @ +   @       @       @ @
-     @         @ :     @       @   @       @ @     %   @   @       @           @ @           @ @     @       @ @       @
-     @ #   @ @ @       @   @   @   @   # + @ @ @   @ @ %   @     @ @             @ @       @ @ @     @ @ ? @ @ @     ; @
-       @ @ @ @ @       ? @ @ @ @   @ @ @ @ @   @ @   @     @ @ @ @                 @ @ @ @ @         @ @ @ @   @ @ @ @ @
-             @                                   @ @ @                                                           : @
-
-"""
-
-
 from PIL import Image
 from PIL import ImageSequence
 from PIL import ImageFont
 from PIL import ImageDraw
-from os import system
 import time
-import math
-
-image = Image.open(r"Y:\py\ASCII\very_cool.png")
-
-lighting = list(r"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,`\"^`'. ")
 
 
-print(Image.open("looping.gif").info["duration"])
-
-# lighting = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
-# lighting.reverse()
-# lighting = ["@", "$", "#", "*", "!", "=", ";", ":", "~", "-", ",", "."]
+lighting = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
+lighting.reverse()
 lightRange = 255/(len(lighting) - 1)
 
 
@@ -55,8 +24,8 @@ def GetLight(value):
     index = round(value/lightRange)
     return lighting[index]+" "
 
+
 def GetDotLight(value):
-    print(value)
     if value > 100:
         return "."
     
@@ -67,14 +36,14 @@ def ToAscii(image, resize=None):
     if resize:
         image = ResizeImage(image, resize)
 
-    image = image.convert("RGB")
+    image = image.convert("RGBA")
     txt = ""
     width, height = image.size
 
     for y in range(height):
         for x in range(width):
-            rgb = image.getpixel((x, y))
-            color = round((rgb[0] + rgb[1] + rgb[2]) / 3)
+            r, g, b, a = image.getpixel((x, y))
+            color = round((r + g + b) / 3) * (a / 255)
             txt += str(GetLight(color))
         if y != height-1:
             txt += "\n"
@@ -94,6 +63,9 @@ def GifToAscii(gif, resize=None):
 
     return frames_list
 
+def ImageToAsciiImage(image, path, resize=None):
+    AsciiToImage(ToAscii(image, resize), 16).save(path)
+
 
 def AsciiToImage(string, textSize):
     start = time.time()
@@ -101,14 +73,14 @@ def AsciiToImage(string, textSize):
     width = round(len(chars[0]) / 2)
     heigth = len(chars)
 
-    image = Image.new("RGB", (width*textSize, heigth*textSize), (255, 255, 255))
+    image = Image.new("RGB", (width*textSize, heigth*textSize), (0, 0, 0))
 
     font = ImageFont.truetype("consolab.ttf", textSize)
     draw = ImageDraw.Draw(image)
 
     for y in range(heigth):
         for x in range(width):
-            draw.text((x * textSize, y * textSize), chars[y][x * 2], (0, 0, 0), font)
+            draw.text((x * textSize, y * textSize), chars[y][x * 2], (255, 255, 255), font)
 
 
    #  print("image time: ", (time.time() - start))
@@ -131,7 +103,6 @@ def GifToAsciiGif(gif, path, res=None):
         else:
             txt = ToAscii(frame)
 
-
         ascii_frames.append(AsciiToImage(txt, 16))
         print("frame" + str(index) + " time: %.2f" % (time.time() - frame_time))
 
@@ -139,17 +110,8 @@ def GifToAsciiGif(gif, path, res=None):
     print("time elapsed: %.2f" % (time.time() - start_time), "seconds")
 
 
+# ImageToAsciiImage(image, "ascii.png", 200)
+# GifToAsciiGif(gif, "ascii.gif", 200)
 
-#GifToAsciiGif(Image.open("tigger.gif"), "tigger_sad.gif", 100)
-
-
-print("lol")
-
-with open("cool.txt", "w") as f:
-    f.write(ToAscii(image, 40))
-
-print("AAA")
-input("done")
-# (AsciiToImage(ToAscii(image), 12)).save("Image2.png")
-
-
+# with open("ascii.txt", "w") as f:
+#     f.write(ToAscii(image, 50))
